@@ -33,7 +33,7 @@ To run these API tests locally via CLI, ensure you have [Node.js](https://nodejs
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/talhakhattak/api-testing-postman-newman.git
+   git clone https://github.com/talha10/api-testing-postman-newman.git
    cd api-testing-postman-newman
    ```
 
