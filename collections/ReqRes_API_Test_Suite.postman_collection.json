@@ -1,0 +1,298 @@
+{
+  "info": {
+    "_postman_id": "c9e2b0de-7cc2-4d1a-9faa-8c10425cc0db",
+    "name": "ReqRes_API_Test_Suite",
+    "description": "Comprehensive CRUD automated test suite for ReqRes.in dummy API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. GET Users List",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Response time is less than 500ms\", function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(500);",
+              "});",
+              "pm.test(\"Page is 2\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.page).to.eql(2);",
+              "});",
+              "pm.test(\"Data array is not empty\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data.length).to.be.above(0);",
+              "});",
+              "pm.test(\"Schema is valid\", function () {",
+              "    var schema = {",
+              "      \"type\": \"object\",",
+              "      \"properties\": {",
+              "        \"page\": {\"type\": \"number\"},",
+              "        \"per_page\": {\"type\": \"number\"},",
+              "        \"total\": {\"type\": \"number\"},",
+              "        \"data\": {",
+              "          \"type\": \"array\",",
+              "          \"items\": {",
+              "            \"type\": \"object\",",
+              "            \"properties\": {",
+              "              \"id\": {\"type\": \"number\"},",
+              "              \"email\": {\"type\": \"string\"},",
+              "              \"first_name\": {\"type\": \"string\"},",
+              "              \"last_name\": {\"type\": \"string\"}",
+              "            },",
+              "            \"required\": [\"id\", \"email\", \"first_name\", \"last_name\"]",
+              "          }",
+              "        }",
+              "      }",
+              "    };",
+              "    pm.expect(tv4.validate(pm.response.json(), schema)).to.be.true;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/users?page=2",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. POST Create User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test(\"Validate response payload matches request\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var reqData = JSON.parse(pm.request.body.raw);",
+              "    pm.expect(jsonData.name).to.eql(reqData.name);",
+              "    pm.expect(jsonData.job).to.eql(reqData.job);",
+              "});",
+              "pm.test(\"Set user_id as collection variable\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.id).to.not.be.undefined;",
+              "    pm.environment.set(\"user_id\", jsonData.id);",
+              "});",
+              "pm.test(\"CreatedAt matches current date\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var todayDate = new Date().toISOString().split('T')[0];",
+              "    pm.expect(jsonData.createdAt).to.include(todayDate);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"morpheus\",\n    \"job\": \"leader\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/users",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. GET Single User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Verify user ID in response matches requested ID\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data.id).to.eql(2);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/users/2",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. GET Single User Not Found",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "pm.test(\"Response is empty JSON\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(Object.keys(jsonData).length).to.eql(0);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/users/23490",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "23490"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. PUT Update User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Validate updated payload fields\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var reqData = JSON.parse(pm.request.body.raw);",
+              "    pm.expect(jsonData.name).to.eql(reqData.name);",
+              "    pm.expect(jsonData.job).to.eql(reqData.job);",
+              "});",
+              "pm.test(\"UpdatedAt field exists\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.updatedAt).to.not.be.undefined;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"morpheus\",\n    \"job\": \"zion resident\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/users/2",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6. DELETE User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204 No Content\", function () {",
+              "    pm.response.to.have.status(204);",
+              "});",
+              "pm.test(\"Response body is empty\", function () {",
+              "    pm.expect(pm.response.text()).to.be.empty;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/users/2",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
